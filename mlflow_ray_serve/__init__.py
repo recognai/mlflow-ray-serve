@@ -1,7 +1,7 @@
 import logging
 import urllib.parse
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import mlflow.pyfunc
 import pandas as pd
@@ -45,7 +45,7 @@ def run_local(name, model_uri, flavor=None, config=None):
     raise MlflowException("mlflow-ray-serve does not currently " "support run_local.")
 
 
-# TODO: All models appear in Ray Dashboard as "MLflowBackend".  Improve this.
+# TODO: All models appear in Ray Dashboard as "MLflowBackend". Improve this.
 class MLflowBackend:
     def __init__(self, model_uri):
         self.model = mlflow.pyfunc.load_model(model_uri=model_uri)
@@ -219,6 +219,7 @@ class RayServePlugin(BaseDeploymentClient):
                 },
             }
             for (name, endpoint_config) in endpoints.items()
+        ]
 
     def get_deployment(self, name):
         try:
