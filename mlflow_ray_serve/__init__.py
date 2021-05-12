@@ -132,9 +132,10 @@ class RayServePlugin(BaseDeploymentClient):
             )
         deployment_config = self._parse_deployment_config(config)
         try:
+            backend_class = type(f"MLflowBackend:{model_uri}", (MLflowBackend,), {})
             self.client.create_backend(
                 model_uri,
-                MLflowBackend,
+                backend_class,
                 model_uri,
                 ray_actor_options=deployment_config.ray_actor_options,
                 config=deployment_config.config,
