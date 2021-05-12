@@ -67,7 +67,7 @@ def test_client_deployment_workflow(deployment_client):
         assert model_output.equals(expected_output)
 
         response = requests.post(
-            "http://localhost:8000/addN", json=model_input.to_json()
+            "http://localhost:8000/addN", json=model_input.to_dict()
         )
         assert response.status_code == 200
         assert pd.read_json(response.content).equals(expected_output)

@@ -45,8 +45,9 @@ def run_local(name, model_uri, flavor=None, config=None):
     raise MlflowException("mlflow-ray-serve does not currently " "support run_local.")
 
 
-# TODO: All models appear in Ray Dashboard as "MLflowBackend". Improve this.
 class MLflowBackend:
+    """Base mlflow model backend wrapper"""
+
     def __init__(self, model_uri):
         self.model = None
         try:
@@ -68,7 +69,8 @@ class MLflowBackend:
         body = await request.body()
         if isinstance(body, pd.DataFrame):
             return body
-        return pd.read_json(json.loads(body))
+        # request body contains a df json representation
+        return pd.read_json(body)
 
     async def __call__(self, request: Request):
         if self.model is None:
