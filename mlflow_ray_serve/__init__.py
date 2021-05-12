@@ -146,7 +146,12 @@ class RayServePlugin(BaseDeploymentClient):
         endpoints = serve.list_endpoints()
         endpoint_cfg = endpoints.get(endpoint)
         if endpoint_cfg is None:
-            serve.create_endpoint(endpoint, backend=new_backend, route=f"/{endpoint}")
+            serve.create_endpoint(
+                endpoint,
+                backend=new_backend,
+                route=f"/{endpoint}",
+                methods=["GET", "POST"],
+            )
             return
 
         traffic = endpoint_cfg.get("traffic", {})
