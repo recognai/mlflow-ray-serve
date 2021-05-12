@@ -1,17 +1,17 @@
-import logging
-import urllib.parse
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
 
+import logging
 import mlflow.pyfunc
 import pandas as pd
 import ray
+import urllib.parse
 from mlflow.deployments import BaseDeploymentClient
 from mlflow.exceptions import MlflowException
 from mlflow.protos.databricks_pb2 import INVALID_PARAMETER_VALUE
 from ray import serve
 from ray.serve.exceptions import RayServeException
 from starlette.requests import Request
+from typing import Dict, Optional
 
 try:
     import ujson as json
@@ -119,7 +119,9 @@ class RayServePlugin(BaseDeploymentClient):
                 config=deployment_config.config,
             )
         except ValueError as ex:
-            logger.error("Cannot deploy model. Model {} already exits.".format(model_uri))
+            logger.error(
+                "Cannot deploy model. Model {} already exits.".format(model_uri)
+            )
             raise ex
 
         self._update_endpoint(
@@ -174,6 +176,7 @@ class RayServePlugin(BaseDeploymentClient):
                     d = d[part]
                 d[parts[-1]] = value
             return resultDict
+
         config = unflatten(config or {})
         deployment_config = DeploymentConfig(**config)
         return deployment_config
@@ -256,4 +259,6 @@ class RayServePlugin(BaseDeploymentClient):
 
         parsed_url = urllib.parse.urlparse(uri)
         address = parsed_url.hostname
+        if parsed_url.port:
+            address += f":{parsed_url.port}"
         return address
