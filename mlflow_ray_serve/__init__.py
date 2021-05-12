@@ -48,7 +48,21 @@ def run_local(name, model_uri, flavor=None, config=None):
 # TODO: All models appear in Ray Dashboard as "MLflowBackend". Improve this.
 class MLflowBackend:
     def __init__(self, model_uri):
-        self.model = mlflow.pyfunc.load_model(model_uri=model_uri)
+        self.model = None
+        try:
+            self.model = mlflow.pyfunc.load_model(model_uri=model_uri)
+        except MlflowException as mlflow_error:
+            logger.error(
+                "Cannot load mlflow model. "
+                "Predictions will be disabled for this backend",
+                exc_info=mlflow_error,
+            )
+        except Exception as ex:
+            logger.error(
+                "Something went very wrong loading model. "
+                "Predictions will be disabled for this backend",
+                exc_info=ex,
+            )
 
     async def _process_request_data(self, request: Request) -> pd.DataFrame:
         body = await request.body()
@@ -57,6 +71,11 @@ class MLflowBackend:
         return pd.read_json(json.loads(body))
 
     async def __call__(self, request: Request):
+        if self.model is None:
+            raise RuntimeError(
+                "Model is not initialize. "
+                "Revise deployment logs and redeploy the backend"
+            )
         df = await self._process_request_data(request)
         return self.model.predict(df).to_json(orient="records")
 
